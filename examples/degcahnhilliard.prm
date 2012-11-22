@@ -1,0 +1,87 @@
+set final time = 1.0
+set number of output points = 100
+set save results = true
+set save history = false
+
+# possible solvers: CVodeGMRES | CVodeBiCG | CVodeTFQMR | CVodeBand | RK23 | RKM45 | DP45 | RKC
+set solver = CVodeGMRES
+
+subsection ODE integrator
+  set relative tolerance = 1.0e-10
+  set absolute tolerance = 1.0e-10
+  subsection CVode
+    set maximum number of steps = 1000000 # better use such an extreme value than have a long computation finished for exceeding it
+    subsection CVodeSpils
+      set precondition = false
+      set Krylov subspace dimension = 45
+    end
+  end
+  subsection Runge-Kutta
+    set safety = 0.9
+  end
+end
+
+subsection Rectangular domain
+  set x-max = 3.0     # default: 1.0
+  set x-min = 0.0    # default: 0.0
+  set y-max = 0.5     # default: 1.0
+  set y-min = 0.0    # default: 0.0
+end
+
+subsection Rectangular grid
+  set x-dimension = 390
+  set y-dimension = 65
+end
+
+subsection Degenerate Cahn-Hilliard equation
+  set xi = -3   # interface width
+#  set xi = 0.187500
+#  set xi = 0.125
+#  set xi = 0.0625
+#  set xi = 0.03125 # 2*1.0/64
+  set beta = 1.0
+  set alpha = 0.5
+  set eps = -1.0
+end
+
+subsection Initial condition
+  set type = Rectangle  # possible types: Wavy circle, Random, Zero, Sinc, Matheval, Two-scale sine, Rectangle
+  subsection Wavy circle
+    set center x = 0.5
+    set center y = 0.5
+    set radius = 0.3
+    set peak size = 0.1
+    set number of peaks = 8
+    set smooth = true
+    set interface width = 0.0625
+  end
+  subsection Random
+    set mean value = 0.9
+    set deviation = 0.01
+  end
+  subsection Matheval
+    # set f(x) = step((x-0.5)^2+(y-0.5)^2-0.3^2)   # circle
+    # set f(x) = 2*step( - sqrt((x-0.5)^2+(y-0.5)^2) + (0.3 + 0.1*cos( 8*atan((x-0.5)/(y-0.5)))) )-1  # wavy circle
+    # set f(x) = tanh( - sqrt((x-0.5)^2+(y-0.5)^2) + (0.3 + 0.1*cos( 8*atan((x-0.5)/(y-0.5))))/0.03 )  # smoothed wavy circle, does not work, don't know why
+    # set f(x) = tanh(( x^2 + y^2 + sin(3*x)*sin(3*y) - 0.3)/0.03)  # strange shape
+    # set f(x) = tanh((((8*x-4)^2+0.025*(8*y-4)^2-0.3)*(0.025*(8*x-4)^2+(8*y-4)^2-0.3) - 2)/0.03)
+    # set f(x) = 2*step( sin(1*x-0.5)*cos(3*y-0.7)-sin(2*x-0.1)*cos(1*y-0.4) ) - 1
+
+    # from the paper of Kim, Kang, Lowengrub: Conservative multigrid for C-H fluids
+    # set f(x) = 0.5+0.12*cos(2*pi*x)*cos(2*pi*y) + 0.2*cos(pi*x)*cos(3*pi*y)
+
+    # Two-scale sine
+    set f(x) = tanh( (0.5+0.1*sin(pi*x)+0.3*sin(16*pi*x) - y)/0.03)
+    # set f(x) = 1.9*step( 0.5+0.1*sin(pi*x)+0.3*sin(16*pi*x) - y)-0.95
+  end
+  subsection Rectangle
+    set lower left x = 0.2
+    set lower left y = 0.2
+    set upper right x = 2.8
+    set upper right y = 0.3
+  end
+  subsection Two-scale sine
+  end
+end
+
+
